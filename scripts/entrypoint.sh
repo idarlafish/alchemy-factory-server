@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SERVER_DIR="${SERVER_DIR:-/opt/alchemyfactory}"
+SERVER_DIR="${SERVER_DIR:-/data/server}"
 DATA_DIR="${DATA_DIR:-/data}"
 PROTON_DIR="${PROTON_DIR:-/opt/proton}"
 STEAMCMDDIR="${STEAMCMDDIR:-/home/steam/steamcmd}"
 export STEAMCMDDIR
 STEAM_APP_ID="${STEAM_APP_ID:-4550060}"
 
-SAVE_DIR="${SERVER_DIR}/AlchemyFactory/Saved"
 CONFIG_NAME="${CONFIG_NAME:-Server Config.ini}"
+SERVER_BINARY="${SERVER_BINARY:-AlchemyFactoryServer.exe}"
 RESTART_DELAY="${RESTART_DELAY:-10}"
 MAX_RESTARTS="${MAX_RESTARTS:-0}"   # 0 = unlimited
 
@@ -19,7 +19,7 @@ if [ ! -w "$DATA_DIR" ]; then
   echo "FATAL: $DATA_DIR is not writable by uid $(id -u). Run: chown -R 1000:1000 <your data dir>" >&2
   exit 1
 fi
-mkdir -p "$STEAM_COMPAT_CLIENT_INSTALL_PATH" "$STEAM_COMPAT_DATA_PATH" "$DATA_DIR/Saved"
+mkdir -p "$STEAM_COMPAT_CLIENT_INSTALL_PATH" "$STEAM_COMPAT_DATA_PATH" "$SERVER_DIR"
 
 if [ "${SKIP_UPDATE:-0}" != "1" ]; then
   echo "==> updating app ${STEAM_APP_ID}"
@@ -29,11 +29,6 @@ if [ "${SKIP_UPDATE:-0}" != "1" ]; then
 else
   echo "==> SKIP_UPDATE=1, using installed build"
 fi
-
-# Saves live on the volume; the game only ever sees its own path.
-rm -rf "$SAVE_DIR"
-mkdir -p "$(dirname "$SAVE_DIR")"
-ln -s "$DATA_DIR/Saved" "$SAVE_DIR"
 
 /usr/local/bin/config.sh "${SERVER_DIR}/${CONFIG_NAME}"
 
@@ -56,7 +51,7 @@ while :; do
   attempt=$((attempt + 1))
   echo "==> starting AlchemyFactoryServer.exe (attempt ${attempt})"
   read -ra extra_args <<< "${EXTRA_ARGS:-}"
-  "${PROTON_DIR}/proton" run "${SERVER_DIR}/AlchemyFactoryServer.exe" -log "${extra_args[@]}" &
+  "${PROTON_DIR}/proton" run "${SERVER_DIR}/${SERVER_BINARY}" -log "${extra_args[@]}" &
   child=$!
   set +e; wait "$child"; code=$?; set -e
   child=""

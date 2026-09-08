@@ -6,13 +6,13 @@ ARG GE_PROTON_VERSION=GE-Proton11-6
 
 ENV STEAM_APP_ID=4550060 \
     GAME_APP_ID=3669570 \
-    SERVER_DIR=/opt/alchemyfactory \
+    SERVER_DIR=/data/server \
     DATA_DIR=/data \
     PROTON_DIR=/opt/proton \
     DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      ca-certificates curl python3 xz-utils tini procps libvulkan1 \
+      ca-certificates curl python3 xz-utils tini procps libvulkan1 libfreetype6 \
  && rm -rf /var/lib/apt/lists/*
 
 RUN set -eux \
@@ -26,15 +26,17 @@ RUN set -eux \
  && tar -xzf /tmp/proton.tar.gz -C "${PROTON_DIR}" --strip-components=1 \
  && rm -f /tmp/proton.tar.gz /tmp/proton.sha512
 
+RUN dbus-uuidgen --ensure=/etc/machine-id 2>/dev/null || head -c 32 /dev/urandom | od -An -tx1 | tr -d " \n" > /etc/machine-id
+
 COPY scripts/entrypoint.sh scripts/config.sh scripts/mods.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/config.sh /usr/local/bin/mods.sh \
- && mkdir -p "${SERVER_DIR}" "${DATA_DIR}" \
- && chown -R steam:steam "${SERVER_DIR}" "${DATA_DIR}" "${PROTON_DIR}"
+ && mkdir -p "${DATA_DIR}" \
+ && chown -R steam:steam "${DATA_DIR}" "${PROTON_DIR}"
 
 # Unreal dedicated servers refuse to run as root.
 ENV HOME=/home/steam
 USER 1000:1000
-WORKDIR ${SERVER_DIR}
+WORKDIR ${DATA_DIR}
 VOLUME ["/data"]
 EXPOSE 27015/udp
 
