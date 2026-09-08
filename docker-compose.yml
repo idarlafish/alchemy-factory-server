@@ -1,0 +1,16 @@
+services:
+  alchemy-factory:
+    image: idarlafish/alchemy-factory-server:latest
+    container_name: alchemy-factory-server
+    restart: unless-stopped
+    ports:
+      - "27015:27015/udp"
+    environment:
+      TZ: Europe/Riga
+      SERVER_PUBLIC: "1"
+      SERVER_RELAY: "0"
+      ADMIN_PASSWORD: change-me
+      # Any key the game supports, including ones added after this image shipped:
+      # CFG_some_new_key: "value"
+    volumes:
+      - ./data:/data
