@@ -42,7 +42,9 @@ ln -s "$DATA_DIR/Saved" "$SAVE_DIR"
 child=""
 shutdown() {
   echo "==> SIGTERM received, stopping server"
-  [ -n "$child" ] && kill -TERM "$child" 2>/dev/null || true
+  if [ -n "$child" ]; then
+    kill -TERM "$child" 2>/dev/null || true
+  fi
   wait "$child" 2>/dev/null || true
   exit 0
 }
