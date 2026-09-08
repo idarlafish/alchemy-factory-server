@@ -26,6 +26,8 @@ RUN set -eux \
  && tar -xzf /tmp/proton.tar.gz -C "${PROTON_DIR}" --strip-components=1 \
  && rm -f /tmp/proton.tar.gz /tmp/proton.sha512
 
+RUN mkdir -p /tmp/.X11-unix && chmod 1777 /tmp/.X11-unix
+
 RUN dbus-uuidgen --ensure=/etc/machine-id 2>/dev/null || head -c 32 /dev/urandom | od -An -tx1 | tr -d " \n" > /etc/machine-id
 
 COPY scripts/entrypoint.sh scripts/config.sh scripts/mods.sh /usr/local/bin/
