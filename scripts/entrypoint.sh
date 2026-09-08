@@ -13,6 +13,10 @@ MAX_RESTARTS="${MAX_RESTARTS:-0}"   # 0 = unlimited
 
 export STEAM_COMPAT_CLIENT_INSTALL_PATH="${DATA_DIR}/steam"
 export STEAM_COMPAT_DATA_PATH="${DATA_DIR}/proton"
+if [ ! -w "$DATA_DIR" ]; then
+  echo "FATAL: $DATA_DIR is not writable by uid $(id -u). Run: chown -R 1000:1000 <your data dir>" >&2
+  exit 1
+fi
 mkdir -p "$STEAM_COMPAT_CLIENT_INSTALL_PATH" "$STEAM_COMPAT_DATA_PATH" "$DATA_DIR/Saved"
 
 if [ "${SKIP_UPDATE:-0}" != "1" ]; then

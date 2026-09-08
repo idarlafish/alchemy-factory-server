@@ -1,0 +1,21 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: ["config:recommended", ":semanticCommits"],
+  timezone: "Europe/Riga",
+  packageRules: [
+    {
+      description: "GE-Proton tags as GE-ProtonN-N, not semver",
+      matchDepNames: ["GloriousEggroll/proton-ge-custom"],
+      versioning: "regex:^GE-Proton(?<major>\\d+)-(?<minor>\\d+)$",
+    },
+  ],
+  customManagers: [
+    {
+      customType: "regex",
+      managerFilePatterns: ["/^Dockerfile$/"],
+      matchStrings: ["ARG GE_PROTON_VERSION=(?<currentValue>GE-Proton[\\d-]+)"],
+      depNameTemplate: "GloriousEggroll/proton-ge-custom",
+      datasourceTemplate: "github-releases",
+    },
+  ],
+}
