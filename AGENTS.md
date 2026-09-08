@@ -27,18 +27,18 @@ Docker image running the Windows-only Alchemy Factory dedicated server under Pro
 - Workshop content needs an owning Steam account; anonymous downloads fail for this game.
 - Upstream calls the server experimental and Windows-only.
 
-## Hard-won constraints — do not regress these
+## Runtime constraints
 
-Each cost a debugging cycle. All are load-bearing:
+These are required for the server to start. Changing any of them breaks it:
 
-- **`PROTON_USE_WINED3D=1`.** UE's NNERuntimeORT plugin probes for D3D12; under vkd3d it
-  gets `E_FAIL` and dereferences null in `dxgi.dll`. wined3d returns `E_INVALIDARG`, which
-  the plugin survives. `-nullrhi` and software Vulkan both failed to help.
-- **Debian trixie or newer.** Proton-GE links `GLIBC_2.38`; bookworm ships 2.36.
-- **Xvfb plus `/tmp/.X11-unix`.** UE initialises graphics even in server builds. The socket
-  directory must be created at build time — uid 1000 cannot create it.
-- **Launch the shipping exe, not `AlchemyFactoryServer.exe`.** The launcher hangs under Wine
-  and never spawns the real binary.
+- **`PROTON_USE_WINED3D=1`.** UE's NNERuntimeORT plugin probes for D3D12. Under vkd3d it
+  receives `E_FAIL` and dereferences null in `dxgi.dll`; under wined3d it receives
+  `E_INVALIDARG` and continues. Neither `-nullrhi` nor a software Vulkan driver avoids this.
+- **Debian trixie or newer.** Proton-GE links against `GLIBC_2.38`; bookworm provides 2.36.
+- **Xvfb, and `/tmp/.X11-unix` created at build time.** UE initialises graphics even in
+  server builds. The socket directory cannot be created by uid 1000 at runtime.
+- **Launch the shipping binary directly.** `AlchemyFactoryServer.exe` is a launcher that
+  hangs under Wine without starting the server.
 
 ## Testing
 
