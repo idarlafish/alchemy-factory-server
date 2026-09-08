@@ -98,8 +98,13 @@ stop the container first, and health cannot be checked by player count.
 
 ## Tags
 
-`latest` from `main`, plus semver tags on release. Rebuilt weekly so the bundled game build
-stays current.
+| Tag | |
+|---|---|
+| `dev` | latest build of `main` — unverified, moves often |
+| `sha-<short>` | immutable, pin this if you need reproducibility |
+| `latest`, `X.Y.Z` | published only from a `v*` git tag |
+
+Rebuilt weekly so the bundled game build stays current.
 
 ## License
 
