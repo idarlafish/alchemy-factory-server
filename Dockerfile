@@ -1,4 +1,4 @@
-FROM cm2network/steamcmd:root-bookworm@sha256:7cc96a9ec113ed6752f81e44ac62a367f1db7d8a055f2680d1aecd35dc2ff516
+FROM cm2network/steamcmd:root-trixie@sha256:e6b6b3503bf0e41feafe12dc709c90151afba193e1292cac55d28a7d470b1493
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
