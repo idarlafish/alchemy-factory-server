@@ -7,6 +7,7 @@
 set -euo pipefail
 
 GAME_APP_ID="${GAME_APP_ID:-3669570}"
+STEAMCMDDIR="${STEAMCMDDIR:-/home/steam/steamcmd}"
 MODS_DIR="${1:?mods dir required}"
 WORK="${DATA_DIR:-/data}/workshop"
 
@@ -35,10 +36,10 @@ done <<< "$ids"
 # Anonymous is tried first: it costs nothing and starts working the moment the
 # developers allow it, without anyone changing their compose file.
 if [ -n "${STEAM_USER:-}" ]; then
-  steamcmd +force_install_dir "$WORK" \
+  "${STEAMCMDDIR}/steamcmd.sh" +force_install_dir "$WORK" \
     +login "$STEAM_USER" "${STEAM_PASS:?STEAM_PASS required when STEAM_USER is set}" \
     "${args[@]}" +quit
-elif ! steamcmd +force_install_dir "$WORK" +login anonymous "${args[@]}" +quit; then
+elif ! "${STEAMCMDDIR}/steamcmd.sh" +force_install_dir "$WORK" +login anonymous "${args[@]}" +quit; then
   echo "mods: anonymous download failed; this game does not serve Workshop content" >&2
   echo "mods: set STEAM_USER/STEAM_PASS (account owning the game, Steam Guard off)" >&2
   exit 1

@@ -4,6 +4,8 @@ set -euo pipefail
 SERVER_DIR="${SERVER_DIR:-/opt/alchemyfactory}"
 DATA_DIR="${DATA_DIR:-/data}"
 PROTON_DIR="${PROTON_DIR:-/opt/proton}"
+STEAMCMDDIR="${STEAMCMDDIR:-/home/steam/steamcmd}"
+export STEAMCMDDIR
 STEAM_APP_ID="${STEAM_APP_ID:-4550060}"
 
 SAVE_DIR="${SERVER_DIR}/AlchemyFactory/Saved"
@@ -21,7 +23,7 @@ mkdir -p "$STEAM_COMPAT_CLIENT_INSTALL_PATH" "$STEAM_COMPAT_DATA_PATH" "$DATA_DI
 
 if [ "${SKIP_UPDATE:-0}" != "1" ]; then
   echo "==> updating app ${STEAM_APP_ID}"
-  steamcmd +@sSteamCmdForcePlatformType windows \
+  "${STEAMCMDDIR}/steamcmd.sh" +@sSteamCmdForcePlatformType windows \
     +force_install_dir "$SERVER_DIR" \
     +login anonymous +app_update "$STEAM_APP_ID" validate +quit
 else
