@@ -12,7 +12,7 @@ ENV STEAM_APP_ID=4550060 \
     DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      ca-certificates curl python3 xz-utils tini procps libvulkan1 libfreetype6 \
+      ca-certificates curl python3 xz-utils tini procps libvulkan1 libfreetype6 xvfb \
  && rm -rf /var/lib/apt/lists/*
 
 RUN set -eux \

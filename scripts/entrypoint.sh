@@ -34,6 +34,15 @@ fi
 
 /usr/local/bin/mods.sh "${SERVER_DIR}/AlchemyFactory/Content/Paks"
 
+# UE initialises graphical subsystems even in server builds, and Wine blocks
+# without a display. Xvfb gives it one; nothing is ever rendered.
+if [ "${ENABLE_XVFB:-1}" = "1" ]; then
+  Xvfb "${XVFB_DISPLAY:-:99}" -screen 0 1024x768x24 -nolisten tcp &
+  xvfb_pid=$!
+  export DISPLAY="${XVFB_DISPLAY:-:99}"
+  echo "==> Xvfb on ${DISPLAY} (pid ${xvfb_pid})"
+fi
+
 child=""
 shutdown() {
   echo "==> SIGTERM received, stopping server"
@@ -41,6 +50,7 @@ shutdown() {
     kill -TERM "$child" 2>/dev/null || true
   fi
   wait "$child" 2>/dev/null || true
+  [ -n "${xvfb_pid:-}" ] && kill "$xvfb_pid" 2>/dev/null
   exit 0
 }
 trap shutdown TERM INT
