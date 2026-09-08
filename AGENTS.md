@@ -23,9 +23,22 @@ Docker image running the Windows-only Alchemy Factory dedicated server under Pro
 ## Facts
 
 - Server app id `4550060` (Tool, anonymous ok). Game app id `3669570`.
-- Entrypoint binary `AlchemyFactoryServer.exe -log`; saves at `AlchemyFactory/Saved/SaveGames`.
-- Workshop content requires an owning account — anonymous `workshop_download_item` fails.
-- Upstream calls the server experimental and warns sessions may need several start attempts.
+- Saves and the rendered config live under `/data/server` — the whole install is on the volume.
+- Workshop content needs an owning Steam account; anonymous downloads fail for this game.
+- Upstream calls the server experimental and Windows-only.
+
+## Hard-won constraints — do not regress these
+
+Each cost a debugging cycle. All are load-bearing:
+
+- **`PROTON_USE_WINED3D=1`.** UE's NNERuntimeORT plugin probes for D3D12; under vkd3d it
+  gets `E_FAIL` and dereferences null in `dxgi.dll`. wined3d returns `E_INVALIDARG`, which
+  the plugin survives. `-nullrhi` and software Vulkan both failed to help.
+- **Debian trixie or newer.** Proton-GE links `GLIBC_2.38`; bookworm ships 2.36.
+- **Xvfb plus `/tmp/.X11-unix`.** UE initialises graphics even in server builds. The socket
+  directory must be created at build time — uid 1000 cannot create it.
+- **Launch the shipping exe, not `AlchemyFactoryServer.exe`.** The launcher hangs under Wine
+  and never spawns the real binary.
 
 ## Testing
 

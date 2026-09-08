@@ -9,9 +9,9 @@ export STEAMCMDDIR
 STEAM_APP_ID="${STEAM_APP_ID:-4550060}"
 
 CONFIG_NAME="${CONFIG_NAME:-Server Config.ini}"
-SERVER_BINARY="${SERVER_BINARY:-AlchemyFactoryServer.exe}"
+SERVER_BINARY="${SERVER_BINARY:-AlchemyFactory/Binaries/Win64/AlchemyFactoryServer-Win64-Shipping.exe}"
 RESTART_DELAY="${RESTART_DELAY:-10}"
-MAX_RESTARTS="${MAX_RESTARTS:-0}"   # 0 = unlimited
+MAX_RESTARTS="${MAX_RESTARTS:-5}"   # 0 = unlimited
 
 export STEAM_COMPAT_CLIENT_INSTALL_PATH="${DATA_DIR}/steam"
 export STEAM_COMPAT_DATA_PATH="${DATA_DIR}/proton"

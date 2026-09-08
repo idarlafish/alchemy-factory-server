@@ -4,7 +4,8 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ARG GE_PROTON_VERSION=GE-Proton11-6
 
-ENV STEAM_APP_ID=4550060 \
+ENV PROTON_USE_WINED3D=1 \
+    STEAM_APP_ID=4550060 \
     GAME_APP_ID=3669570 \
     SERVER_DIR=/data/server \
     DATA_DIR=/data \
@@ -12,7 +13,7 @@ ENV STEAM_APP_ID=4550060 \
     DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      ca-certificates curl python3 xz-utils tini procps libvulkan1 mesa-vulkan-drivers libfreetype6 xvfb \
+      ca-certificates curl python3 xz-utils tini procps libvulkan1 libfreetype6 xvfb \
  && rm -rf /var/lib/apt/lists/*
 
 RUN set -eux \

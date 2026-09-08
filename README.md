@@ -22,7 +22,13 @@ services:
       - ./data:/data
 ```
 
-Join via the **join code** printed in the logs, the public server list, or `IP:Port`.
+The container runs as uid 1000, so `mkdir data && chown 1000:1000 data` first.
+On Kubernetes set `securityContext.fsGroup: 1000` instead.
+
+The log prints a **join code** — share that. With `SERVER_RELAY=1` traffic goes
+through Steam and direct IP joins are unavailable; set it to `0` if you have a
+public IP and would rather open a port.
+
 Become admin in-game with `/admin <ADMIN_PASSWORD>` in chat; `/help` lists the rest.
 
 ## Configuration
