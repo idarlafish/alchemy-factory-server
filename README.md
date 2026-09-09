@@ -65,14 +65,22 @@ tomorrow works today.
 
 | Variable | Default | |
 |---|---|---|
+| `AUTO_RESTART` | `1` | daily restart; also picks up Steam patches |
+| `AUTO_RESTART_AT` | `04:00` | time of day for that restart, container `TZ` |
 | `SKIP_UPDATE` | `0` | `1` pins the installed build instead of updating on start |
+| `HEALTHY_AFTER` | `300` | seconds of uptime that resets the failure counter |
 | `RESTART_DELAY` | `10` | seconds between restart attempts |
 | `MAX_RESTARTS` | `0` | `0` = unlimited |
 | `EXTRA_ARGS` | | extra args appended to the server command |
 | `TZ` | | |
 
 The server is supervised and restarted automatically — upstream notes it *"may require several
-attempts to successfully establish a network session"*.
+attempts to successfully establish a network session"*. Only consecutive quick failures count
+towards `MAX_RESTARTS`, so a long-lived server is not killed off by occasional crashes.
+
+The daily restart matters more than it looks: the game only updates when the container starts,
+and clients are refused with a version mismatch after a Steam patch. Restarting daily keeps the
+server in step. Set `AUTO_RESTART=0` to manage updates yourself.
 
 ## Mods
 
