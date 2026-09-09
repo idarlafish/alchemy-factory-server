@@ -22,8 +22,17 @@ services:
 `mkdir data && chown 1000:1000 data` first — the container runs as uid 1000.
 For Kubernetes see [examples/kubernetes.yaml](examples/kubernetes.yaml).
 
-The log prints a **join code**; share that. Become admin in chat with
-`/admin <ADMIN_PASSWORD>`, then `/help`.
+First start downloads ~650 MB of game files before the server boots; later starts are quick.
+
+Share the **join code** with players:
+
+```bash
+docker compose logs | grep "join code"
+```
+
+Become admin in chat with `/admin <ADMIN_PASSWORD>`, then `/help`.
+
+See [docs/troubleshooting.md](docs/troubleshooting.md) when something breaks.
 
 ## Server settings
 
@@ -61,6 +70,9 @@ Without the daily restart, a Steam patch leaves clients rejected on a version mi
 
 `/data/server` holds the install, saves and config; `/data/proton` and `/data/steam`
 hold Proton and SteamCMD state.
+
+Saves are at `/data/server/AlchemyFactory/Saved/SaveGames`. The install is about
+750 MB before saves.
 
 The game has no RCON, query protocol or REST API. **It does not save on shutdown** — a
 restart loses progress since the last autosave, and backups are crash-consistent.
