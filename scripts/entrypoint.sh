@@ -21,11 +21,23 @@ if [ ! -w "$DATA_DIR" ]; then
 fi
 mkdir -p "$STEAM_COMPAT_CLIENT_INSTALL_PATH" "$STEAM_COMPAT_DATA_PATH" "$SERVER_DIR"
 
-if [ "${SKIP_UPDATE:-0}" != "1" ]; then
-  echo "==> updating app ${STEAM_APP_ID}"
+update_app() {
   "${STEAMCMDDIR}/steamcmd.sh" +@sSteamCmdForcePlatformType windows \
     +force_install_dir "$SERVER_DIR" \
     +login anonymous +app_update "$STEAM_APP_ID" validate +quit
+}
+
+if [ "${SKIP_UPDATE:-0}" != "1" ]; then
+  echo "==> updating app ${STEAM_APP_ID}"
+  # Steam can leave the manifest flagged "update required" with nothing to
+  # fetch, which fails every subsequent run. Dropping it forces a re-verify
+  # against the files already on disk.
+  if ! update_app; then
+    echo "==> update failed; clearing Steam state and retrying"
+    rm -f "${SERVER_DIR}/steamapps/appmanifest_${STEAM_APP_ID}.acf"
+    rm -rf "${SERVER_DIR}/steamapps/downloading" "${SERVER_DIR}/steamapps/temp"
+    update_app
+  fi
 else
   echo "==> SKIP_UPDATE=1, using installed build"
 fi
