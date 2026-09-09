@@ -31,8 +31,8 @@ RUN mkdir -p /tmp/.X11-unix && chmod 1777 /tmp/.X11-unix
 
 RUN dbus-uuidgen --ensure=/etc/machine-id 2>/dev/null || head -c 32 /dev/urandom | od -An -tx1 | tr -d " \n" > /etc/machine-id
 
-COPY scripts/entrypoint.sh scripts/config.sh scripts/mods.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/config.sh /usr/local/bin/mods.sh \
+COPY scripts/ /usr/local/bin/
+RUN chmod +x /usr/local/bin/*.sh \
  && mkdir -p "${DATA_DIR}" \
  && chown -R steam:steam "${DATA_DIR}" "${PROTON_DIR}"
 

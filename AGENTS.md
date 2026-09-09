@@ -4,11 +4,16 @@ Docker image running the Windows-only Alchemy Factory dedicated server under Pro
 
 ## Layout
 
-- `Dockerfile` — `cm2network/steamcmd` base + Proton-GE, runs as `steam`
-- `scripts/entrypoint.sh` — update, link saves, render config, fetch mods, supervise the server
+- `Dockerfile` — steamcmd base + Proton, runs as uid 1000
+- `scripts/helpers.sh` — shared paths and `log()`, sourced by the rest
+- `scripts/entrypoint.sh` — preflight, then install → config → mods → `exec run.sh`
+- `scripts/install.sh` — SteamCMD install/update, recovers a stuck app manifest
 - `scripts/config.sh` — renders `Server Config.ini` from env
 - `scripts/mods.sh` — optional Workshop download
-- `.github/workflows/build.yml` — shellcheck + hadolint, then push to Docker Hub and GHCR
+- `scripts/auto_restart.sh` — daily restart signal
+- `scripts/run.sh` — display, supervision, shutdown
+- `tests/` — shell tests that run without Proton
+- `.github/workflows/build.yml` — shellcheck, hadolint, tests, then push
 
 ## Hard rules
 
@@ -42,5 +47,7 @@ These are required for the server to start. Changing any of them breaks it:
 
 ## Testing
 
-`shellcheck scripts/*.sh` and `hadolint Dockerfile` are what CI runs. The server itself needs
+`shellcheck -S style -x scripts/*.sh tests/*.sh`, `hadolint Dockerfile` and `./tests/test-config.sh`
+are what CI runs. The tests avoid Proton so they run on any machine, including bash 3.2 — keep
+them that way. The server itself needs
 an amd64 host; `docker compose up` with `./data` mounted is the fastest loop.

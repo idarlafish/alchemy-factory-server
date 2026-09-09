@@ -20,7 +20,10 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: shellcheck
-        run: shellcheck scripts/*.sh
+        run: shellcheck -S style -x scripts/*.sh tests/*.sh
+
+      - name: tests
+        run: ./tests/test-config.sh
       - name: hadolint
         uses: hadolint/hadolint-action@v3.1.0
         with:
