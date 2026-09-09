@@ -89,7 +89,6 @@ Everything persistent lives in `/data`:
 - `/data/Saved` — game saves (symlinked to `AlchemyFactory/Saved`)
 - `/data/proton` — Proton prefix
 - `/data/steam` — Steam compat client dir
-- `/data/workshop` — downloaded mods
 
 There is **no RCON, query protocol or REST API**, so backups are crash-consistent unless you
 stop the container first, and health cannot be checked by player count.

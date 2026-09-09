@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Orchestrates startup: preflight, install, configure, mods, then run.
+# Orchestrates startup: preflight, install, configure, then run.
 set -euo pipefail
 # shellcheck source=scripts/helpers.sh
 . /usr/local/bin/helpers.sh
