@@ -15,6 +15,5 @@ mkdir -p "$STEAM_COMPAT_CLIENT_INSTALL_PATH" "$STEAM_COMPAT_DATA_PATH" "$SERVER_
 
 /usr/local/bin/install.sh
 /usr/local/bin/config.sh "${SERVER_DIR}/${CONFIG_NAME}"
-/usr/local/bin/mods.sh "${SERVER_DIR}/AlchemyFactory/Content/Paks"
 
 exec /usr/local/bin/run.sh

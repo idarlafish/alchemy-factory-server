@@ -6,10 +6,9 @@ Docker image running the Windows-only Alchemy Factory dedicated server under Pro
 
 - `Dockerfile` — steamcmd base + Proton, runs as uid 1000
 - `scripts/helpers.sh` — shared paths and `log()`, sourced by the rest
-- `scripts/entrypoint.sh` — preflight, then install → config → mods → `exec run.sh`
+- `scripts/entrypoint.sh` — preflight, then install → config → `exec run.sh`
 - `scripts/install.sh` — SteamCMD install/update, recovers a stuck app manifest
 - `scripts/config.sh` — renders `Server Config.ini` from env
-- `scripts/mods.sh` — optional Workshop download
 - `scripts/auto_restart.sh` — daily restart signal
 - `scripts/run.sh` — display, supervision, shutdown
 - `tests/` — shell tests that run without Proton
@@ -29,7 +28,8 @@ Docker image running the Windows-only Alchemy Factory dedicated server under Pro
 
 - Server app id `4550060` (Tool, anonymous ok). Game app id `3669570`.
 - Saves and the rendered config live under `/data/server` — the whole install is on the volume.
-- Workshop content needs an owning Steam account; anonymous downloads fail for this game.
+- Workshop mods are not supported: this game refuses anonymous Workshop downloads, so it
+  would require a Steam account that owns the game with Steam Guard disabled.
 - Upstream calls the server experimental and Windows-only.
 
 ## Runtime constraints

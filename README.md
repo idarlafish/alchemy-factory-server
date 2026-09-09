@@ -82,22 +82,6 @@ The daily restart matters more than it looks: the game only updates when the con
 and clients are refused with a version mismatch after a Steam patch. Restarting daily keeps the
 server in step. Set `AUTO_RESTART=0` to manage updates yourself.
 
-## Mods
-
-The game supports Steam Workshop, but **Workshop downloads are not served to anonymous logins**,
-so mods require a Steam account that owns Alchemy Factory with Steam Guard disabled.
-
-| Variable | |
-|---|---|
-| `STEAM_USER` / `STEAM_PASS` | account owning the game; **use a throwaway account** |
-| `WORKSHOP_COLLECTION` | public collection id, resolved via the Steam API |
-| `WORKSHOP_IDS` | space-separated item ids |
-
-Skipped entirely unless `STEAM_USER` and a mod source are both set.
-
-> Not yet verified that the experimental dedicated server loads Workshop `.pak` mods at all.
-> The plumbing is here; treat it as untested until confirmed.
-
 ## Data
 
 Everything persistent lives in `/data`:
