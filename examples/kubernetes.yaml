@@ -1,0 +1,56 @@
+# Minimal Kubernetes example. fsGroup is required: the container runs as uid
+# 1000 and cannot write a volume mounted root-owned.
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: alchemy-factory
+stringData:
+  serverPassword: change-me
+  adminPassword: change-me-too
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: alchemy-factory
+spec:
+  selector:
+    matchLabels:
+      app: alchemy-factory
+  serviceName: alchemy-factory
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: alchemy-factory
+    spec:
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+      containers:
+        - name: alchemy-factory
+          image: idarlafish/alchemy-factory-server:latest
+          env:
+            - name: SERVER_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: alchemy-factory, key: serverPassword }
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: alchemy-factory, key: adminPassword }
+          resources:
+            requests:
+              cpu: "500m"
+              memory: 3Gi
+            limits:
+              memory: 4Gi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 20Gi

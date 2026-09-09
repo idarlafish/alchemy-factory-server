@@ -20,7 +20,7 @@ services:
 ```
 
 `mkdir data && chown 1000:1000 data` first — the container runs as uid 1000.
-On Kubernetes use `securityContext.fsGroup: 1000`.
+For Kubernetes see [examples/kubernetes.yaml](examples/kubernetes.yaml).
 
 The log prints a **join code**; share that. Become admin in chat with
 `/admin <ADMIN_PASSWORD>`, then `/help`.
