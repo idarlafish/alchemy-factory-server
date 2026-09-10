@@ -36,7 +36,7 @@ See [docs/troubleshooting.md](docs/troubleshooting.md) when something breaks.
 
 ## Server settings
 
-Written to `Server Config.ini` on every start.
+Merged into the server's own `ServerConfig.ini` on every start, in place.
 
 | Variable | | |
 |---|---|---|

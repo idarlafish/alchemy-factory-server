@@ -8,7 +8,7 @@ Docker image running the Windows-only Alchemy Factory dedicated server under Pro
 - `scripts/helpers.sh` — shared paths and `log()`, sourced by the rest
 - `scripts/entrypoint.sh` — preflight, then install → config → `exec run.sh`
 - `scripts/install.sh` — SteamCMD install/update, recovers a stuck app manifest
-- `scripts/config.sh` — renders `Server Config.ini` from env
+- `scripts/config.sh` — merges env into the game's own `ServerConfig.ini`, in place
 - `scripts/auto_restart.sh` — daily restart signal
 - `scripts/run.sh` — display, supervision, shutdown
 - `tests/` — shell tests that run without Proton
@@ -19,7 +19,10 @@ Docker image running the Windows-only Alchemy Factory dedicated server under Pro
 - **Unreal servers refuse to run as root.** The image runs as `steam`; keep it that way.
 - **`linux/amd64` only.** The binary is Windows x86-64 under Proton; do not add ARM.
 - **Never break `CFG_*` passthrough.** It is what keeps the image usable when upstream adds
-  config keys, so arbitrary keys must always reach `Server Config.ini` verbatim.
+  config keys, so arbitrary keys must always reach `ServerConfig.ini` verbatim.
+- **The game reads `ServerConfig.ini` and is launched with no `-ServerConfig=`.** Write that
+  file, preserving its `[ServerSettings]` header and comments; a key outside the section or a
+  lost header reverts the server to defaults — public, passwordless — with no error.
 - **No RCON exists.** Do not add save-before-backup or player-count healthchecks; the server
   offers no remote control surface.
 - Pin `GE_PROTON_VERSION` in the Dockerfile; Renovate/CI bumps it deliberately.

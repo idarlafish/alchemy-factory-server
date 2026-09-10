@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Renders "Server Config.ini" from the environment.
+# Renders the server's ServerConfig.ini from the environment.
 #
 #   CFG_<key>=<value>   -> "<key> = <value>"   (verbatim, for keys we don't know yet)
 #   friendly aliases    -> mapped to their documented ini keys
@@ -9,7 +9,9 @@ set -euo pipefail
 
 CONFIG_FILE="${1:?config path required}"
 pairs="$(mktemp)"
-trap 'rm -f "$pairs"' EXIT
+merged="$(mktemp)"
+out="$(mktemp)"
+trap 'rm -f "$pairs" "$merged" "$out"' EXIT
 
 # env name -> ini key
 alias_map="
@@ -20,7 +22,7 @@ SERVER_NAME:server_name
 SERVER_PASSWORD:server_password
 ADMIN_PASSWORD:admin_password
 SERVER_PORT:server_port
-MAX_PLAYERS:max_players
+MAX_PLAYERS:max_clients
 "
 
 for pair in $alias_map; do
@@ -42,19 +44,45 @@ if [ ! -s "$pairs" ]; then
   exit 0
 fi
 
-out="$(mktemp)"
-awk -F'\t' '{last[$1] = $2} END {for (k in last) print k " = " last[k]}' "$pairs" | sort > "$out"
+awk -F'\t' '{last[$1] = $2} END {for (k in last) print k "\t" last[k]}' "$pairs" | sort > "$merged"
 
-# Keep any key the server generated that we are not overriding.
+# The game generates this file itself, with a [ServerSettings] header and comments.
+# Rewrite it line by line so overridden keys change value in place and everything
+# else — header, comments, blank lines, key order — survives verbatim. A key written
+# outside its section, or a lost section header, silently reverts the server to defaults.
 if [ -f "$CONFIG_FILE" ]; then
-  while IFS= read -r line; do
-    key="$(printf '%s' "$line" | sed -n 's/^[[:space:]]*\([A-Za-z0-9_]\{1,\}\)[[:space:]]*=.*/\1/p')"
-    [ -n "$key" ] || continue
-    grep -q "^${key} = " "$out" && continue
-    printf '%s\n' "$line" >> "$out"
-  done < "$CONFIG_FILE"
+  awk -v pairs="$merged" '
+    BEGIN {
+      while ((getline line < pairs) > 0) {
+        sep = index(line, "\t")
+        if (sep == 0) continue
+        key = substr(line, 1, sep - 1)
+        val[key] = substr(line, sep + 1)
+        keys[++n] = key
+      }
+    }
+    {
+      if (match($0, /^[ \t]*[A-Za-z0-9_]+[ \t]*=/)) {
+        key = $0
+        sub(/^[ \t]*/, "", key)
+        sub(/[ \t]*=.*$/, "", key)
+        if (key in val) {
+          # Replace the first occurrence, drop any later duplicate of the same key.
+          if (!(key in seen)) { print key " = " val[key]; seen[key] = 1 }
+          next
+        }
+      }
+      print
+    }
+    END {
+      for (i = 1; i <= n; i++)
+        if (!(keys[i] in seen)) { print keys[i] " = " val[keys[i]]; seen[keys[i]] = 1 }
+    }
+  ' "$CONFIG_FILE" > "$out"
+else
+  awk -F'\t' '{print $1 " = " $2}' "$merged" > "$out"
 fi
 
-mv "$out" "$CONFIG_FILE"
+cat "$out" > "$CONFIG_FILE"
 echo "config: wrote $CONFIG_FILE"
 sed 's/\(password[[:space:]]*=[[:space:]]*\).*/\1***/I' "$CONFIG_FILE"
