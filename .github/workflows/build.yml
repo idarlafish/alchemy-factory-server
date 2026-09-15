@@ -12,6 +12,7 @@ on:
       - "tests/**"
       - ".github/workflows/build.yml"
   pull_request:
+    types: [opened, synchronize, reopened, labeled]
   schedule:
     # Game auto-updates; rebuild weekly so the published image stays current.
     - cron: "0 4 * * 1"
@@ -79,11 +80,15 @@ jobs:
           cache-to: type=gha,mode=max
 
   # Publishes an image for a pull request so it can be tested before merging.
-  # Gated on the dev-image environment, so it waits for approval from the PR page.
+  # Opt in with the build-image label, so unrelated pull requests are not left with a
+  # pending deployment. Then the dev-image environment asks for approval on the PR page.
   # Fork pull requests get no secrets, so it is limited to branches in this repo.
   publish-pr:
     needs: lint
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    if: |
+      github.event_name == 'pull_request'
+      && github.event.pull_request.head.repo.full_name == github.repository
+      && contains(github.event.pull_request.labels.*.name, 'build-image')
     runs-on: ubuntu-latest
     environment: dev-image
     permissions:
