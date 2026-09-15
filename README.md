@@ -88,6 +88,7 @@ restart loses progress since the last autosave, and backups are crash-consistent
 |---|---|
 | `latest`, `X.Y.Z` | releases, from a `v*` git tag |
 | `dev` | latest `main`, moves often |
+| `dev-<branch>` | manual run of the build workflow on that branch |
 | `sha-<short>` | immutable, for pinning |
 
 ## License
