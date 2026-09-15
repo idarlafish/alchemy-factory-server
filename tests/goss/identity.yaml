@@ -1,0 +1,30 @@
+# Who the server ends up running as, and who owns its files. Shared by every
+# scenario that starts as root; the expected ids come from a vars file.
+file:
+  /usr/local/bin/joincode:
+    exists: true
+    mode: "0755"
+  /usr/local/bin/logstream.sh:
+    exists: true
+    mode: "0755"
+command:
+  steam-uid:
+    exec: id -u steam
+    exit-status: 0
+    stdout: ["{{ .Vars.uid }}"]
+  steam-gid:
+    exec: id -g steam
+    exit-status: 0
+    stdout: ["{{ .Vars.gid }}"]
+  data-ownership:
+    exec: stat -c '%u:%g' /data
+    exit-status: 0
+    stdout: ["{{ .Vars.uid }}:{{ .Vars.gid }}"]
+  home-ownership:
+    exec: stat -c '%u:%g' /home/steam
+    exit-status: 0
+    stdout: ["{{ .Vars.uid }}:{{ .Vars.gid }}"]
+  server-runs-as:
+    exec: cat /data/launched-uid
+    exit-status: 0
+    stdout: ["{{ .Vars.uid }}"]

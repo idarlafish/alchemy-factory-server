@@ -1,0 +1,10 @@
+# Started as another user: that uid is kept and steam is left alone.
+command:
+  container-uid:
+    exec: id -u
+    exit-status: 0
+    stdout: ["{{ .Vars.uid }}"]
+  steam-not-renumbered:
+    exec: id -u steam
+    exit-status: 0
+    stdout: ["1000"]
