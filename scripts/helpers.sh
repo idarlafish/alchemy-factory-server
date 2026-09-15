@@ -14,6 +14,8 @@ export SERVER_DIR DATA_DIR PROTON_DIR STEAMCMDDIR STEAM_APP_ID GAME_APP_ID
 export CONFIG_NAME SERVER_BINARY RESTART_FLAG
 
 LOG_FILE="${LOG_FILE:-${SERVER_DIR}/AlchemyFactory/Saved/Logs/AlchemyFactory.log}"
-export LOG_FILE
+PUID="${PUID:-1000}"
+PGID="${PGID:-1000}"
+export LOG_FILE PUID PGID
 
 log() { echo "==> $*"; }

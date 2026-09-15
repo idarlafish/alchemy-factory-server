@@ -60,3 +60,9 @@ rm /data/server/steamapps/appmanifest_4550060.acf
 
 Expected. The first start downloads roughly 650 MB of game files before the server
 boots. Later starts reuse the volume and are quick.
+
+## `setpriv: ... Operation not permitted` on start
+
+The entrypoint starts as root and drops to `PUID`:`PGID`, which needs `SETUID` and
+`SETGID`. With `cap_drop: [ALL]`, add them back — or set `user:` / `runAsUser` instead,
+which skips the root phase entirely.
