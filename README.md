@@ -88,7 +88,7 @@ restart loses progress since the last autosave, and backups are crash-consistent
 |---|---|
 | `latest`, `X.Y.Z` | releases, from a `v*` git tag |
 | `dev` | latest `main`, moves often |
-| `pr-<number>` | approved from a pull request, for testing before merge |
+| `pr-<number>` | label a PR `build-image` and approve, to test before merge |
 | `sha-<short>` | immutable, for pinning |
 
 ## License
