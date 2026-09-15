@@ -6,7 +6,7 @@ Docker image running the Windows-only Alchemy Factory dedicated server under Pro
 
 - `Dockerfile` — steamcmd base + Proton, runs as uid 1000
 - `scripts/helpers.sh` — shared paths and `log()`, sourced by the rest
-- `scripts/entrypoint.sh` — preflight, then install → config → `exec run.sh`
+- `scripts/entrypoint.sh` — PUID/PGID + drop if root, preflight, install → config → `exec run.sh`
 - `scripts/install.sh` — SteamCMD install/update, recovers a stuck app manifest
 - `scripts/config.sh` — merges env into the game's own `ServerConfig.ini`, in place
 - `scripts/auto_restart.sh` — daily restart signal
@@ -18,7 +18,9 @@ Docker image running the Windows-only Alchemy Factory dedicated server under Pro
 
 ## Hard rules
 
-- **Unreal servers refuse to run as root.** The image runs as `steam`; keep it that way.
+- **The game process must not run as root.** The entrypoint may start as root to apply
+  PUID/PGID, but it drops to `steam` via `setpriv` before `run.sh`, so saves and config on
+  the volume stay owned by the operator's uid.
 - **`linux/amd64` only.** The binary is Windows x86-64 under Proton; do not add ARM.
 - **Never break `CFG_*` passthrough.** It is what keeps the image usable when upstream adds
   config keys, so arbitrary keys must always reach `ServerConfig.ini` verbatim.

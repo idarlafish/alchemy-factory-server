@@ -34,11 +34,13 @@ RUN dbus-uuidgen --ensure=/etc/machine-id 2>/dev/null || head -c 32 /dev/urandom
 COPY scripts/ /usr/local/bin/
 RUN chmod +x /usr/local/bin/*.sh /usr/local/bin/joincode \
  && mkdir -p "${DATA_DIR}" \
- && chown -R steam:steam "${DATA_DIR}" "${PROTON_DIR}"
+ && chown -R steam:0 /home/steam "${DATA_DIR}" "${PROTON_DIR}" \
+ && chmod -R g=u /home/steam "${DATA_DIR}" "${PROTON_DIR}"
 
-# Unreal dedicated servers refuse to run as root.
+# No USER: the entrypoint starts as root to apply PUID/PGID, then drops to steam.
+# Running it with --user/runAsUser skips that and keeps the given uid; the group-0
+# permissions above are what make that path writable.
 ENV HOME=/home/steam
-USER 1000:1000
 WORKDIR ${DATA_DIR}
 VOLUME ["/data"]
 EXPOSE 27015/udp

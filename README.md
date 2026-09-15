@@ -19,7 +19,8 @@ services:
       - ./data:/data
 ```
 
-`mkdir data && chown 1000:1000 data` first — the container runs as uid 1000.
+`mkdir data` first. The container starts as root, chowns `/data` to `PUID`:`PGID`
+(default `1000:1000`) and drops to that user, so host ownership is handled for you.
 For Kubernetes see [examples/kubernetes.yaml](examples/kubernetes.yaml).
 
 First start downloads ~650 MB of game files before the server boots; later starts are quick.
@@ -64,6 +65,7 @@ best-effort aliases. `CFG_<key>` works for keys added after this image shipped.
 | `MAX_RESTARTS` | `5` | consecutive failures before giving up; `0` = unlimited |
 | `HEALTHY_AFTER` | `300` | uptime in seconds that resets the failure counter |
 | `RESTART_DELAY` | `10` | seconds between attempts |
+| `PUID` · `PGID` | `1000` | uid/gid the server runs as; `/data` is chowned to match |
 | `STDOUT_LOG` | `1` | stream `[ServerConfig]` log lines to stdout; `0` disables |
 | `EXTRA_ARGS` · `TZ` | | |
 

@@ -1,5 +1,6 @@
-# Minimal Kubernetes example. fsGroup is required: the container runs as uid
-# 1000 and cannot write a volume mounted root-owned.
+# Minimal Kubernetes example. With runAsUser set the root phase is skipped and
+# fsGroup grants access to the volume; without it the entrypoint starts as root
+# and applies PUID/PGID itself.
 ---
 apiVersion: v1
 kind: Secret
