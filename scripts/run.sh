@@ -24,9 +24,15 @@ if [ "${AUTO_RESTART:-1}" = "1" ]; then
   scheduler_pid=$!
 fi
 
+if [ "${STDOUT_LOG:-1}" = "1" ]; then
+  /usr/local/bin/logstream.sh &
+  logstream_pid=$!
+fi
+
 child=""
 cleanup() {
   [ -n "${scheduler_pid:-}" ] && kill "$scheduler_pid" 2>/dev/null
+  [ -n "${logstream_pid:-}" ] && kill "$logstream_pid" 2>/dev/null
   [ -n "${xvfb_pid:-}" ] && kill "$xvfb_pid" 2>/dev/null
   return 0
 }
