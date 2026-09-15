@@ -39,8 +39,10 @@ Nothing appears in the log because the packets never reach the server.
 Use the join code:
 
 ```bash
-docker compose logs | grep "join code"
+docker compose exec alchemy-lab joincode
 ```
+
+It reads the log file, so it works regardless of `STDOUT_LOG`.
 
 ## `Error! App '4550060' state is 0x6 after update job`
 

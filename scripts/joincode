@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Prints the current join code. Players need this plus SERVER_PASSWORD.
+set -euo pipefail
+# shellcheck source=scripts/helpers.sh
+. /usr/local/bin/helpers.sh
+
+# grep exits 1 with no match and 2 with no file; neither is an error here.
+code="$(grep -oE 'join code: [A-Z0-9]+' "$LOG_FILE" 2>/dev/null | tail -1 | sed 's/^join code: //' || true)"
+
+if [ -z "$code" ]; then
+  echo "no join code yet: the server is still starting, or $LOG_FILE is missing" >&2
+  exit 1
+fi
+echo "$code"

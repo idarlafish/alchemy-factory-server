@@ -11,6 +11,8 @@ Docker image running the Windows-only Alchemy Factory dedicated server under Pro
 - `scripts/config.sh` — merges env into the game's own `ServerConfig.ini`, in place
 - `scripts/auto_restart.sh` — daily restart signal
 - `scripts/run.sh` — display, supervision, shutdown
+- `scripts/logstream.sh` — echoes `[ServerConfig]` log lines to stdout
+- `scripts/joincode` — prints the current join code
 - `tests/` — shell tests that run without Proton
 - `.github/workflows/build.yml` — shellcheck, hadolint, tests, then push
 
@@ -20,6 +22,9 @@ Docker image running the Windows-only Alchemy Factory dedicated server under Pro
 - **`linux/amd64` only.** The binary is Windows x86-64 under Proton; do not add ARM.
 - **Never break `CFG_*` passthrough.** It is what keeps the image usable when upstream adds
   config keys, so arbitrary keys must always reach `ServerConfig.ini` verbatim.
+- **The engine's stdout does not cross Proton.** `-stdout` is silently ignored, so tailing the
+  log file is the only way to reach stdout. Keep `logstream.sh`'s filter narrow: `Login request`
+  lines carry the join password in cleartext.
 - **The game reads `ServerConfig.ini` and is launched with no `-ServerConfig=`.** Write that
   file, preserving its `[ServerSettings]` header and comments; a key outside the section or a
   lost header reverts the server to defaults — public, passwordless — with no error.

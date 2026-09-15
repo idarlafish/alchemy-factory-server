@@ -27,8 +27,10 @@ First start downloads ~650 MB of game files before the server boots; later start
 Share the **join code** with players:
 
 ```bash
-docker compose logs | grep "join code"
+docker compose exec alchemy-lab joincode
 ```
+
+It is also on stdout: `docker compose logs | grep "join code"`.
 
 Become admin in chat with `/admin <ADMIN_PASSWORD>`, then `/help`.
 
@@ -62,6 +64,7 @@ best-effort aliases. `CFG_<key>` works for keys added after this image shipped.
 | `MAX_RESTARTS` | `5` | consecutive failures before giving up; `0` = unlimited |
 | `HEALTHY_AFTER` | `300` | uptime in seconds that resets the failure counter |
 | `RESTART_DELAY` | `10` | seconds between attempts |
+| `STDOUT_LOG` | `1` | stream `[ServerConfig]` log lines to stdout; `0` disables |
 | `EXTRA_ARGS` · `TZ` | | |
 
 Without the daily restart, a Steam patch leaves clients rejected on a version mismatch.
