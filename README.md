@@ -47,9 +47,11 @@ Merged into the server's own `ServerConfig.ini` on every start, in place.
 | `ADMIN_PASSWORD` | | enables `/admin` |
 | `SERVER_NAME` | | |
 | `SERVER_PUBLIC` | | list in the public server browser |
-| `SERVER_RELAY` | `1` | route via Steam; direct IP joins unavailable |
+| `SERVER_RELAY` | `1` | route via Steam; no inbound ports needed. `0` needs 9877/udp and 9878/udp published |
 | `SERVER_LAN` | | LAN only |
-| `SERVER_PORT` · `MAX_PLAYERS` | | |
+| `SERVER_PORT` | `9877` | game port (UDP) |
+| `QUERY_PORT` | `9878` | Steam query port (UDP) |
+| `MAX_PLAYERS` | | |
 | `CFG_<key>` | | any key verbatim, overrides the above |
 
 Upstream documents only `server_lan`, `server_relay` and `server_public`; the rest are

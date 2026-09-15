@@ -38,6 +38,10 @@ spec:
             - name: ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef: { name: alchemy-factory, key: adminPassword }
+          # Only needed with SERVER_RELAY=0, plus a Service to match.
+          # ports:
+          #   - { name: game, containerPort: 9877, protocol: UDP }
+          #   - { name: query, containerPort: 9878, protocol: UDP }
           resources:
             requests:
               cpu: "500m"

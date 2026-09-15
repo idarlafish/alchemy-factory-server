@@ -9,5 +9,9 @@ services:
       ADMIN_PASSWORD: change-me-too
       # Any config key, including ones added after this image shipped:
       # CFG_some_new_key: "value"
+    # Only needed with SERVER_RELAY=0; the default routes traffic through Steam.
+    # ports:
+    #   - "9877:9877/udp"
+    #   - "9878:9878/udp"
     volumes:
       - ./data:/data

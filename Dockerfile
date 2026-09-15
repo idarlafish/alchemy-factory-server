@@ -43,7 +43,7 @@ RUN chmod +x /usr/local/bin/*.sh /usr/local/bin/joincode \
 ENV HOME=/home/steam
 WORKDIR ${DATA_DIR}
 VOLUME ["/data"]
-EXPOSE 27015/udp
+EXPOSE 9877/udp 9878/udp
 
 # No RCON or query protocol exists, so liveness is process-level only.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=180s --retries=3 \

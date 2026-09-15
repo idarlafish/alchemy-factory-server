@@ -38,6 +38,11 @@ check "server_public"  "server_public = 1"    "$tmp/a.ini"
 check "server_relay"   "server_relay = 0"     "$tmp/a.ini"
 check "admin_password" "admin_password = secret" "$tmp/a.ini"
 
+echo "port aliases map to the keys the game uses"
+( SERVER_PORT=9877 QUERY_PORT=9878 "$SCRIPT" "$tmp/p.ini" >/dev/null )
+check "server_port" "server_port = 9877" "$tmp/p.ini"
+check "query_port"  "query_port = 9878"  "$tmp/p.ini"
+
 echo "CFG_ passthrough writes unknown keys verbatim"
 ( CFG_some_new_key=value "$SCRIPT" "$tmp/b.ini" >/dev/null )
 check "new key" "some_new_key = value" "$tmp/b.ini"

@@ -22,6 +22,7 @@ SERVER_NAME:server_name
 SERVER_PASSWORD:server_password
 ADMIN_PASSWORD:admin_password
 SERVER_PORT:server_port
+QUERY_PORT:query_port
 MAX_PLAYERS:max_clients
 "
 
