@@ -69,7 +69,7 @@ jobs:
             type=ref,event=pr
 
       # amd64 only: the server is a Windows x86-64 binary under Proton.
-      - uses: docker/build-push-action@v6
+      - uses: docker/build-push-action@v7
         with:
           context: .
           platforms: linux/amd64
@@ -109,7 +109,7 @@ jobs:
           images: ${{ secrets.DOCKERHUB_USERNAME }}/alchemy-factory-server
           tags: type=ref,event=pr
 
-      - uses: docker/build-push-action@v6
+      - uses: docker/build-push-action@v7
         with:
           context: .
           platforms: linux/amd64
