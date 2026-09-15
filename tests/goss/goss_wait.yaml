@@ -1,0 +1,6 @@
+# dgoss retries this until it passes before running the real checks, so the
+# scenarios do not depend on a fixed sleep. The stub writes this file once the
+# entrypoint has finished dropping privileges and launched the server.
+file:
+  /data/launched-uid:
+    exists: true

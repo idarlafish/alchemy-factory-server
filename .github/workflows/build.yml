@@ -44,6 +44,14 @@ jobs:
       contents: read
     env:
       DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+      GOSS_FILES_PATH: tests/goss
+      GOSS_OPTS: --format documentation
+      CONTAINER_LOG_OUTPUT: /tmp/smoke/container.log
+      SMOKE_ARGS: >-
+        --rm -v /tmp/smoke/stub:/stub
+        -e DATA_DIR=/data -e SERVER_DIR=/data/server -e PROTON_DIR=/stub
+        -e SERVER_BINARY=fake.exe -e LOG_FILE=/data/server/AlchemyFactory.log
+        -e SKIP_UPDATE=1 -e ENABLE_XVFB=0 -e AUTO_RESTART=0
     steps:
       - uses: actions/checkout@v7
 
@@ -74,10 +82,74 @@ jobs:
           context: .
           platforms: linux/amd64
           push: ${{ github.event_name != 'pull_request' }}
+          load: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      # 0.4.10 moved to tarballs, which this action cannot fetch yet.
+      - name: install goss
+        uses: e1himself/goss-installation-action@v1
+        with:
+          version: v0.4.9
+
+      - name: prepare the smoke fixtures
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/smoke/stub
+          printf '#!/usr/bin/env bash\nid -u > /data/launched-uid\nid -g > /data/launched-gid\nsleep 60\n' \
+            > /tmp/smoke/stub/proton
+          chmod +x /tmp/smoke/stub/proton
+          echo "IMG=$(printf '%s' "${{ steps.meta.outputs.tags }}" | head -1)" >> "$GITHUB_ENV"
+
+      - name: smoke - image metadata
+        run: |
+          set -euo pipefail
+          ports="$(docker inspect "$IMG" --format '{{json .Config.ExposedPorts}}')"
+          echo "exposed: $ports"
+          grep -q '"9877/udp"' <<< "$ports"
+          grep -q '"9878/udp"' <<< "$ports"
+          [ -z "$(docker inspect "$IMG" --format '{{.Config.User}}')" ]
+          [ "$(docker inspect "$IMG" --format '{{.Architecture}}')" = amd64 ]
+          docker inspect "$IMG" --format '{{json .Config.Entrypoint}}' | grep -q '/usr/bin/tini'
+
+      - name: smoke - root start, default ids
+        run: |
+          d="$(mktemp -d)" && mkdir -p "$d/server"
+          read -ra args <<< "$SMOKE_ARGS"
+          GOSS_FILE=identity.yaml GOSS_VARS=vars-default.yaml dgoss run "${args[@]}" -v "$d:/data" "$IMG" \
+            || { echo "--- container log:"; cat /tmp/smoke/container.log; exit 1; }
+
+      - name: smoke - root start, PUID=1007 PGID=1003
+        run: |
+          d="$(mktemp -d)" && mkdir -p "$d/server"
+          read -ra args <<< "$SMOKE_ARGS"
+          GOSS_FILE=identity.yaml GOSS_VARS=vars-puid.yaml \
+            dgoss run "${args[@]}" -v "$d:/data" -e PUID=1007 -e PGID=1003 "$IMG" \
+            || { echo "--- container log:"; cat /tmp/smoke/container.log; exit 1; }
+
+      - name: smoke - started as another user
+        run: |
+          # No root phase here, so the volume has to be writable up front, the way
+          # an operator would chown it or Kubernetes would apply fsGroup.
+          d="$(mktemp -d)" && mkdir -p "$d/server" && chmod -R 0777 "$d"
+          read -ra args <<< "$SMOKE_ARGS"
+          GOSS_FILE=nonroot.yaml GOSS_VARS=vars-nonroot.yaml \
+            dgoss run "${args[@]}" -v "$d:/data" --user 1005:0 -e PUID=1007 "$IMG" \
+            || { echo "--- container log:"; cat /tmp/smoke/container.log; exit 1; }
+
+      - name: smoke - joincode, logstream and config
+        run: |
+          d="$(mktemp -d)" && mkdir -p "$d/server"
+          read -ra args <<< "$SMOKE_ARGS"
+          GOSS_FILE=helpers.yaml GOSS_VARS=vars-default.yaml dgoss run "${args[@]}" -v "$d:/data" "$IMG" \
+            || { echo "--- container log:"; cat /tmp/smoke/container.log; exit 1; }
+
+      - name: smoke - non-numeric ids are refused
+        run: |
+          docker run --rm -e PUID=bob -e DATA_DIR=/data "$IMG" 2>&1 \
+            | grep -q 'PUID/PGID must be numeric'
 
   # Publishes an image for a pull request so it can be tested before merging.
   # Opt in with the build-image label, so unrelated pull requests are not left with a

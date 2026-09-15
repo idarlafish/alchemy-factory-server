@@ -1,0 +1,35 @@
+# joincode, logstream and config.sh, exercised inside the image.
+command:
+  joincode-reports-the-latest:
+    exec: |
+      echo '[0] [ServerConfig] join code: AAAA1111BBBB22' > /tmp/l
+      echo '[1] [ServerConfig] join code: ZZZZ9999YYYY88' >> /tmp/l
+      LOG_FILE=/tmp/l joincode
+    exit-status: 0
+    stdout: ["ZZZZ9999YYYY88"]
+  joincode-fails-without-a-log:
+    exec: LOG_FILE=/tmp/absent joincode
+    exit-status: 1
+  logstream-passes-serverconfig-and-hides-the-password:
+    exec: |
+      : > /tmp/s
+      LOG_FILE=/tmp/s timeout 8 /usr/local/bin/logstream.sh > /tmp/out 2>/dev/null &
+      sleep 2
+      echo '[0] [ServerConfig] join code: STREAMED123456' >> /tmp/s
+      echo '[1] LogNet: Login request: ?Password=hunter2?Name=Echo' >> /tmp/s
+      sleep 4
+      echo "streamed=$(grep -c STREAMED123456 /tmp/out) leaked=$(grep -c Password /tmp/out)"
+    exit-status: 0
+    stdout: ["streamed=1 leaked=0"]
+  config-renders-into-the-file-the-game-reads:
+    exec: |
+      printf '; note\n[ServerSettings]\nserver_public=1\n' > /tmp/c.ini
+      SERVER_PUBLIC=0 SERVER_PORT=30015 QUERY_PORT=30016 config.sh /tmp/c.ini >/dev/null
+      cat /tmp/c.ini
+    exit-status: 0
+    stdout:
+      - "[ServerSettings]"
+      - "; note"
+      - "server_public = 0"
+      - "server_port = 30015"
+      - "query_port = 30016"
