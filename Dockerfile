@@ -2,7 +2,7 @@ FROM cm2network/steamcmd:root-trixie@sha256:e6b6b3503bf0e41feafe12dc709c90151afb
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-ARG GE_PROTON_VERSION=GE-Proton11-6
+ARG GE_PROTON_VERSION=GE-Proton11-7
 
 ENV PROTON_USE_WINED3D=1 \
     STEAM_APP_ID=4550060 \
