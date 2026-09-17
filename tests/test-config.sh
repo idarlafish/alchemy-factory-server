@@ -23,8 +23,8 @@ absent() {
   fi
 }
 precedes() { # name earlier later file
-  a=$(grep -nF "$2" "$4" | head -1 | cut -d: -f1)
-  b=$(grep -nF "$3" "$4" | head -1 | cut -d: -f1)
+  a=$(grep -nF "$2" "$4" | head -1 | cut -d: -f1 || true)
+  b=$(grep -nF "$3" "$4" | head -1 | cut -d: -f1 || true)
   if [ -n "$a" ] && [ -n "$b" ] && [ "$a" -lt "$b" ]; then
     echo "  ok: $1"
   else
@@ -35,6 +35,8 @@ precedes() { # name earlier later file
 echo "friendly aliases map to ini keys"
 ( SERVER_PUBLIC=1 SERVER_RELAY=0 ADMIN_PASSWORD=secret "$SCRIPT" "$tmp/a.ini" >/dev/null )
 check "server_public"  "server_public = 1"    "$tmp/a.ini"
+check "a fresh file starts with the section the game reads" "[ServerSettings]" "$tmp/a.ini"
+precedes "keys sit inside the section" "[ServerSettings]" "server_public = 1" "$tmp/a.ini"
 check "server_relay"   "server_relay = 0"     "$tmp/a.ini"
 check "admin_password" "admin_password = secret" "$tmp/a.ini"
 
@@ -73,6 +75,14 @@ absent   "stale public gone"    "server_public=1"           "$tmp/f.ini"
 absent   "max_players is not a real key" "max_players"      "$tmp/f.ini"
 precedes "keys stay inside the section" "[ServerSettings]" "server_public = 0" "$tmp/f.ini"
 precedes "appended keys stay inside the section" "[ServerSettings]" "max_clients = 8" "$tmp/f.ini"
+
+echo "a header-less file from 0.1.3-0.1.5 is repaired, not patched in place"
+printf 'server_public = 1\nserver_name = old\n' > "$tmp/g.ini"
+( SERVER_PUBLIC=0 "$SCRIPT" "$tmp/g.ini" >/dev/null )
+check    "header added"        "[ServerSettings]"  "$tmp/g.ini"
+check    "other key kept"      "server_name = old" "$tmp/g.ini"
+check    "override applied"    "server_public = 0" "$tmp/g.ini"
+precedes "header comes first"  "[ServerSettings]" "server_name = old" "$tmp/g.ini"
 
 echo "unset variables produce no keys"
 ( "$SCRIPT" "$tmp/e.ini" >/dev/null )

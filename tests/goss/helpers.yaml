@@ -21,6 +21,13 @@ command:
       echo "streamed=$(grep -c STREAMED123456 /tmp/out) leaked=$(grep -c Password /tmp/out)"
     exit-status: 0
     stdout: ["streamed=1 leaked=0"]
+  config-creates-a-file-the-game-will-read:
+    exec: |
+      rm -f /tmp/fresh.ini
+      SERVER_RELAY=0 SERVER_PASSWORD=x config.sh /tmp/fresh.ini >/dev/null
+      head -1 /tmp/fresh.ini
+    exit-status: 0
+    stdout: ["[ServerSettings]"]
   config-renders-into-the-file-the-game-reads:
     exec: |
       printf '; note\n[ServerSettings]\nserver_public=1\n' > /tmp/c.ini
