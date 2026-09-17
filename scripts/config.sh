@@ -47,42 +47,43 @@ fi
 
 awk -F'\t' '{last[$1] = $2} END {for (k in last) print k "\t" last[k]}' "$pairs" | sort > "$merged"
 
-# The game generates this file itself, with a [ServerSettings] header and comments.
-# Rewrite it line by line so overridden keys change value in place and everything
-# else — header, comments, blank lines, key order — survives verbatim. A key written
-# outside its section, or a lost section header, silently reverts the server to defaults.
-if [ -f "$CONFIG_FILE" ]; then
-  awk -v pairs="$merged" '
-    BEGIN {
-      while ((getline line < pairs) > 0) {
-        sep = index(line, "\t")
-        if (sep == 0) continue
-        key = substr(line, 1, sep - 1)
-        val[key] = substr(line, sep + 1)
-        keys[++n] = key
-      }
-    }
-    {
-      if (match($0, /^[ \t]*[A-Za-z0-9_]+[ \t]*=/)) {
-        key = $0
-        sub(/^[ \t]*/, "", key)
-        sub(/[ \t]*=.*$/, "", key)
-        if (key in val) {
-          # Replace the first occurrence, drop any later duplicate of the same key.
-          if (!(key in seen)) { print key " = " val[key]; seen[key] = 1 }
-          next
-        }
-      }
-      print
-    }
-    END {
-      for (i = 1; i <= n; i++)
-        if (!(keys[i] in seen)) { print keys[i] " = " val[keys[i]]; seen[keys[i]] = 1 }
-    }
-  ' "$CONFIG_FILE" > "$out"
-else
-  awk -F'\t' '{print $1 " = " $2}' "$merged" > "$out"
+# The game ignores every key outside [ServerSettings]; fresh volumes and 0.1.3-0.1.5 files lack it.
+if [ ! -f "$CONFIG_FILE" ]; then
+  printf '[ServerSettings]\n' > "$CONFIG_FILE"
+elif ! grep -q '^\[ServerSettings\]' "$CONFIG_FILE"; then
+  { printf '[ServerSettings]\n'; cat "$CONFIG_FILE"; } > "$out"
+  cat "$out" > "$CONFIG_FILE"
 fi
+
+# Overridden keys change value in place; header, comments and order survive verbatim.
+awk -v pairs="$merged" '
+  BEGIN {
+    while ((getline line < pairs) > 0) {
+      sep = index(line, "\t")
+      if (sep == 0) continue
+      key = substr(line, 1, sep - 1)
+      val[key] = substr(line, sep + 1)
+      keys[++n] = key
+    }
+  }
+  {
+    if (match($0, /^[ \t]*[A-Za-z0-9_]+[ \t]*=/)) {
+      key = $0
+      sub(/^[ \t]*/, "", key)
+      sub(/[ \t]*=.*$/, "", key)
+      if (key in val) {
+        # Replace the first occurrence, drop any later duplicate of the same key.
+        if (!(key in seen)) { print key " = " val[key]; seen[key] = 1 }
+        next
+      }
+    }
+    print
+  }
+  END {
+    for (i = 1; i <= n; i++)
+      if (!(keys[i] in seen)) { print keys[i] " = " val[keys[i]]; seen[keys[i]] = 1 }
+  }
+' "$CONFIG_FILE" > "$out"
 
 cat "$out" > "$CONFIG_FILE"
 echo "config: wrote $CONFIG_FILE"
